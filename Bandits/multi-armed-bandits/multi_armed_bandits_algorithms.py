@@ -2,6 +2,23 @@ import numpy as np
 
 
 def explore_then_exploit_naive(n_steps, n_arms, explore_fraction, p):
+    """
+    Implements a naive explore-then-exploit strategy for multi-armed bandits.
+
+    Args:
+        n_steps (int): Total number of steps in the experiment.
+        n_arms (int): Number of arms in the Multi-Armed Bandit problem.
+        explore_fraction (float): Fraction of total steps to be used for exploration.
+        p (numpy.ndarray of float): Array containing the probability of success for each arm.
+
+    Returns:
+        explore_per_arm (int): Number of steps allocated for exploration per arm.
+        results_all_arms_end_of_explore (numpy.ndarray): Array containing the binary results of exploration for each arm.
+        end_of_explore_results (numpy.ndarray): Array containing the total number of successes for each arm at the end of exploration.
+        actions (numpy.ndarray): Array containing the index of the chosen arm at each step.
+        rewards (numpy.ndarray): Array containing the binary reward obtained at each step (success = 1, failure = 0)
+        changes (list): List of tuples containing the index of each step where the arm was changed and the index of the new arm.
+    """
     if explore_fraction > 1.0:
         raise Exception("Explore fraction shouldn't be more than 1 !")
 
@@ -41,7 +58,18 @@ def explore_then_exploit_naive(n_steps, n_arms, explore_fraction, p):
     return explore_per_arm, results_all_arms_end_of_explore, end_of_explore_results, actions, rewards, changes
 
 
-def total_explore_arm_pulls_for_elimination_algo(n_arms, n_rounds, round_steps_per_arm):
+def total_explore_arm_pulls_for_elimination_algo(n_arms: int, n_rounds: int, round_steps_per_arm: int):
+    """
+    Calculates the total number of arm pulls required to explore all arms in a given number of rounds and steps per arm.
+
+    Args:
+        n_arms (int): The number of arms.
+        n_rounds (int): The number of rounds.
+        round_steps_per_arm (int): The number of steps per arm for each round.
+
+    Returns:
+        int: The total number of arm pulls required to explore all arms.
+    """
     total = 0
     for round_i in range(n_rounds):
         total = total + n_arms - round_i
@@ -49,6 +77,30 @@ def total_explore_arm_pulls_for_elimination_algo(n_arms, n_rounds, round_steps_p
 
 
 def explore_then_exploit_elimination(n_steps, n_arms, n_rounds, round_steps_per_arm, p):
+    """
+    Implements an explore-then-exploit elimination algorithm for multi-armed bandits.
+
+    Args:
+        n_steps (int): The total number of steps.
+        n_arms (int): The number of arms.
+        n_rounds (int): The number of rounds.
+        round_steps_per_arm (int): The number of steps per arm for each round.
+        p (numpy.ndarray of float): 1D numpy array containing the probability of success for each arm.
+
+    Raises:
+        Exception: If the number of rounds is greater than or equal to the number of arms.
+        Exception: If the total number of steps is less than the number of arm pulls required to explore all arms.
+
+    Returns:
+        results_all_arms_end_of_explore (np.ndarray): The results for all arms at the end of exploration.
+        end_of_explore_total (np.ndarray): The total number of successful pulls for each arm at the end of exploration.
+        results_all_arms (np.ndarray): The results for all arms during both exploration and exploitation.
+        eliminations (List[Tuple[int, int, int]]): A list of tuples containing the arm index, step, and total number of pulls for eliminated arms.
+        actions (np.ndarray): The actions taken by the algorithm at each step.
+        rewards (np.ndarray): The rewards received by the algorithm at each step.
+        changes (List[Tuple[int, int]]): A list of tuples containing the step at which we change an arm and it's index.
+    """
+
     n_steps_explore = total_explore_arm_pulls_for_elimination_algo(n_arms, n_rounds, round_steps_per_arm)
     n_steps_exploit = n_steps - n_steps_explore
 
@@ -121,6 +173,22 @@ def explore_then_exploit_elimination(n_steps, n_arms, n_rounds, round_steps_per_
 
 
 def epsilon_greedy(n_trials, n_arms, epsilon, p):
+    """
+    Simulates the epsilon-greedy algorithm for a multi-armed bandit problem.
+
+    Args:
+        n_trials (int): The number of trials to simulate.
+        n_arms (int): The number of arms in the bandit problem.
+        epsilon (float): The probability of choosing a random arm instead of the one with the highest estimated value.
+        p (numpy.ndarray of float): 1D numpy array containing the probability of success for each arm.
+
+    Returns:
+        actions (np.ndarray): The arm chosen at each trial.
+        rewards (np.ndarray): The reward received at each trial.
+        N (np.ndarray): The number of times each arm was chosen.
+        Q (np.ndarray): The estimated value for each arm.
+    """
+
     Q = np.zeros(n_arms)  # Action-value estimates
     N = np.zeros(n_arms)  # Number of times each action is taken
 
@@ -148,6 +216,22 @@ def epsilon_greedy(n_trials, n_arms, epsilon, p):
 
 
 def elimination_confidence_bound_algorithm(n_arms, n_steps, c, p):
+    """
+    Simulate the Elimination Confidence Bound Algorithm (ECBA) for multi-armed bandit problem.
+
+    Args:
+        n_arms (int): The number of arms (i.e., actions) in the multi-armed bandit.
+        n_steps (int): The number of steps to play the game.
+        c (float): A constant that determines the exploration-exploitation trade-off. A larger c value results in more exploration.
+        p (np.ndarray of float): A numpy array of size n_arms representing the true win probabilities of each arm.
+
+    Returns:
+        selected_arms (np.ndarray): A numpy array of size n_steps representing the arm selected at each step.
+        rewards (np.ndarray): A numpy array of size n_steps representing the reward obtained at each step.
+        wins (np.ndarray): A numpy array of size n_arms representing the number of wins obtained by each arm.
+        losses (np.ndarray): A numpy array of size n_arms representing the number of losses obtained by each arm.
+        eliminations (list): A list containing tuples of size 3 representing the (arm, round, step) for each eliminated arm.
+    """
     # Initialize variables
     wins = np.zeros(n_arms)
     losses = np.zeros(n_arms)
@@ -207,6 +291,21 @@ def elimination_confidence_bound_algorithm(n_arms, n_steps, c, p):
 
 
 def ucb_algorithm(n_arms, n_steps, c, p):
+    """
+    Simulate the Elimination Confidence Bound Algorithm (ECBA) for multi-armed bandit problem.
+
+    Args:
+        n_arms (int): The number of arms (i.e., actions) in the multi-armed bandit.
+        n_steps (int): The number of steps to play the game.
+        c (float): A constant that determines the exploration-exploitation trade-off. A larger c value results in more exploration.
+        p (np.ndarray of float): A numpy array of size n_arms representing the true win probabilities of each arm.
+
+    Returns:
+        selected_arms (np.ndarray): A numpy array of size n_steps representing the arm selected at each step.
+        rewards (np.ndarray): A numpy array of size n_steps representing the reward obtained at each step.
+        wins (np.ndarray): A numpy array of size n_arms representing the number of wins obtained by each arm.
+        losses (np.ndarray): A numpy array of size n_arms representing the number of losses obtained by each arm.
+    """
     # Initialize variables
     wins = np.zeros(n_arms)
     losses = np.zeros(n_arms)
