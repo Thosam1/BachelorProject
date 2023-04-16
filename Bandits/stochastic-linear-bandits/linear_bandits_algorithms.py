@@ -85,3 +85,48 @@ class EnvironmentLinUCB:
 
     def get_regrets(self):
         return self.regrets
+
+
+def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
+    # Initializing the LinUCB class
+    linucb = LinUCB(n_arms, n_features, item_features, n_rounds, lambda_param)
+
+    # Initializing the environment
+    environment = EnvironmentLinUCB(n_arms, n_features, item_features, n_rounds, true_theta, noise)
+
+    for t in range(1, n_rounds + 1):
+        # Picking up the best action based on theta_hat
+        arm_chosen = linucb.choose_action(t)
+
+        # Reward received based on the action taken
+        expected_reward, reward_with_noise = environment.observe_reward(t, arm_chosen)
+
+        # Compute regret
+        environment.calculate_regret(t, expected_reward)
+
+        # Update algorithm values after receiving reward
+        linucb.update(t, reward_with_noise)
+
+    regrets = environment.get_regrets()
+
+    return regrets
+
+
+def run_lin_ucb_average(n_simulations, n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
+    total_regrets = np.zeros(n_rounds + 1)
+
+    for i in range(n_simulations):
+        curr_regret_array = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
+        total_regrets += curr_regret_array
+
+    avg_regret = total_regrets / n_simulations
+
+    return avg_regret
+
+
+def plot_regret(regrets):
+    # Plot the results
+    plt.plot(regrets)
+    plt.xlabel('Round')
+    plt.ylabel('Cumulative Regret')
+    plt.show()
