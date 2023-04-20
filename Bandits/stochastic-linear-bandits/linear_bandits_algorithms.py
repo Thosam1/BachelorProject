@@ -56,6 +56,13 @@ class LinUCB:
         # This estimate represents the center of the ellipsoid in the feature space.
         self.theta_hat[:, curr_round] = V_t_inv @ self.sum_A_s_X_s
 
+    def get_all_theta_hat(self):
+        return self.theta_hat
+    
+    def get_last_theta_hat(self):
+        return self.theta_hat[self.n_rounds+1]
+
+
 
 class EnvironmentLinUCB:
     def __init__(self, n_arms, n_features, item_features, n_rounds, true_theta, noise):
@@ -108,20 +115,24 @@ def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, 
         linucb.update(t, reward_with_noise)
 
     regrets = environment.get_regrets()
+    all_theta_hat = linucb.get_all_theta_hat()
 
-    return regrets
+    return regrets, all_theta_hat
 
 
 def run_lin_ucb_average(n_simulations, n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
     total_regrets = np.zeros(n_rounds + 1)
+    total_all_theta_hat = np.zeros((n_features, n_rounds + 1))
 
     for i in range(n_simulations):
-        curr_regret_array = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
+        curr_regret_array, curr_all_theta_hat = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
         total_regrets += curr_regret_array
+        total_all_theta_hat += curr_all_theta_hat
 
     avg_regret = total_regrets / n_simulations
+    avg_curr_all_theta_hat = total_all_theta_hat / n_simulations
 
-    return avg_regret
+    return avg_regret, avg_curr_all_theta_hat
 
 
 def plot_regret(regrets):
@@ -129,4 +140,44 @@ def plot_regret(regrets):
     plt.plot(regrets)
     plt.xlabel('Round')
     plt.ylabel('Cumulative Regret')
+    plt.show()
+
+def plot_cumulative_regrets(list_of_regrets, list_of_labels):
+    fig, ax = plt.subplots()
+    for i, cumulative_regrets in enumerate(list_of_regrets):
+        ax.plot(cumulative_regrets, label=list_of_labels[i])
+
+    ax.set(xlabel='Time steps', ylabel='Cumulative regret', title='Cumulative regret over time')
+    ax.grid()
+    ax.legend()
+    plt.show()
+
+def diff_theta_hat_true_theta(true_theta, theta_hat_array):
+    n_features = theta_hat_array.shape[0]
+    n_rounds = theta_hat_array.shape[1]
+    diff_per_rounds = np.zeros(n_rounds)
+
+    for i in range(n_rounds):
+        diff = np.abs(np.subtract(true_theta, theta_hat_array[:, i].reshape(n_features, 1)))
+        total_diff = np.sum(diff)
+        diff_per_rounds[i] = total_diff
+
+    return diff_per_rounds
+
+def plot_diff_theta_hat_true_theta(diff_per_rounds):
+    # Plot the results
+    plt.plot(diff_per_rounds)
+    plt.xlabel('Round')
+    plt.ylabel('Absolute difference between true theta and estimated theta')
+    plt.show()
+    
+
+def plot_multiple_diff_theta_hat_true_theta(list_of_diff_per_rounds, list_of_labels):
+    fig, ax = plt.subplots()
+    for i, cumulative_regrets in enumerate(list_of_diff_per_rounds):
+        ax.plot(cumulative_regrets, label=list_of_labels[i])
+
+    ax.set(xlabel='Time steps', ylabel='Absolute difference', title='Absolute difference between true theta and estimated theta')
+    ax.grid()
+    ax.legend()
     plt.show()
