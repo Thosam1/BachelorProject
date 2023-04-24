@@ -56,9 +56,11 @@ class LinUCB:
         # This estimate represents the center of the ellipsoid in the feature space.
         self.theta_hat[:, curr_round] = V_t_inv @ self.sum_A_s_X_s
 
+    # Returns the matrix of each estimated theta at every round
     def get_all_theta_hat(self):
         return self.theta_hat
     
+    # Returns the last estimated theta
     def get_last_theta_hat(self):
         return self.theta_hat[self.n_rounds+1]
 
@@ -78,22 +80,23 @@ class EnvironmentLinUCB:
         self.rewards = np.zeros(n_rounds + 1)  # rewards with noise
         self.regrets = np.zeros(n_rounds + 1)
 
-    # Observe the reward of the chosen action and add noise.
+    # Observe the reward of the chosen action and add noise
     def observe_reward(self, curr_round, action):
         expected_reward = self.true_theta.T @ self.item_features[:, action]
         self.rewards[curr_round] = expected_reward + np.random.normal(
-            scale=self.noise)  # this might be the reason why we get negative regret
+            scale=self.noise)  
         return expected_reward, self.rewards[curr_round]
 
+    # Compute the regret for this round
     def calculate_regret(self, curr_round, expected_reward):
-        # Compute the regret for this round.
         regret = self.optimal_reward - expected_reward
         self.regrets[curr_round] = self.regrets[curr_round - 1] + regret
 
+    # Returns the cumulative regret
     def get_regrets(self):
         return self.regrets
 
-
+# Run a simulation of linear UCB
 def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
     # Initializing the LinUCB class
     linucb = LinUCB(n_arms, n_features, item_features, n_rounds, lambda_param)
