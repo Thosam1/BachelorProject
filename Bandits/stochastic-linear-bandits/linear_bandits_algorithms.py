@@ -125,6 +125,9 @@ def run_lin_ucb_average(n_simulations, n_arms, n_features, item_features, n_roun
     total_all_theta_hat = np.zeros((n_features, n_rounds + 1))
 
     for i in range(n_simulations):
+        item_features = np.random.uniform(low=-1, high=1, size=(n_features, n_arms))
+        true_theta = np.random.uniform(low=-1, high=1, size=(n_features, 1))
+
         curr_regret_array, curr_all_theta_hat = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
         total_regrets += curr_regret_array
         total_all_theta_hat += curr_all_theta_hat
