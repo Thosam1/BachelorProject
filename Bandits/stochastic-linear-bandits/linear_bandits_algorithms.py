@@ -26,7 +26,7 @@ class LinUCB:
     def choose_action(self, curr_round):
         if(self.beta_fixed==False):
             # must increase logarithmically
-            self.beta_param_t = np.log(curr_round / 2.0 + 1.0) + 1.0
+            self.beta_param_t = np.log(curr_round + 1.0) + 1.0
 
         max_value = -np.Inf
         max_index = -1
