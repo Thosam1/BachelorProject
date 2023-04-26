@@ -3,12 +3,14 @@ import matplotlib.pyplot as plt
 
 
 class LinUCB:
-    def __init__(self, n_arms, n_features, item_features, n_rounds, lambda_param):
+    def __init__(self, n_arms, n_features, item_features, n_rounds, lambda_param, beta_fixed=True, beta_value=1.0):
         self.n_arms = n_arms
         self.n_features = n_features
         self.item_features = item_features
         self.n_rounds = n_rounds
         self.lambda_param = lambda_param
+        self.beta_fixed = beta_fixed
+        self.beta_value = beta_value
 
         # Initializing variables
         self.V_t = lambda_param * np.eye(n_features)
@@ -16,12 +18,16 @@ class LinUCB:
         self.theta_hat = np.zeros((n_features, n_rounds + 1))
         self.theta_hat[:, 0] = np.random.uniform(low=-1, high=1, size=(n_features, 1)).reshape((n_features,))
 
-        self.beta_param_t = 1.0
+        self.beta_param_t = beta_value
         self.actions = np.zeros(n_rounds + 1, dtype=int)
         self.rewards = np.zeros(n_rounds + 1)
 
     # Choose the best action based on the last theta_hat
     def choose_action(self, curr_round):
+        if(self.beta_fixed==False):
+            # must increase logarithmically
+            self.beta_param_t = np.log(curr_round / 2.0 + 1.0) + 1.0
+
         max_value = -np.Inf
         max_index = -1
         for i in range(self.n_arms):
@@ -73,7 +79,6 @@ class EnvironmentLinUCB:
         self.item_features = item_features
         self.n_rounds = n_rounds
         self.true_theta = true_theta
-        self.noise = noise
 
         # Initializing variables
         self.optimal_reward = np.max(item_features.T @ true_theta)
@@ -97,9 +102,9 @@ class EnvironmentLinUCB:
         return self.regrets
 
 # Run a simulation of linear UCB
-def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
+def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param, beta_fixed=True, beta_value=1.0):
     # Initializing the LinUCB class
-    linucb = LinUCB(n_arms, n_features, item_features, n_rounds, lambda_param)
+    linucb = LinUCB(n_arms, n_features, item_features, n_rounds, lambda_param, beta_fixed, beta_value)
 
     # Initializing the environment
     environment = EnvironmentLinUCB(n_arms, n_features, item_features, n_rounds, true_theta, noise)
@@ -123,22 +128,27 @@ def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, 
     return regrets, all_theta_hat
 
 
-def run_lin_ucb_average(n_simulations, n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param):
+def run_lin_ucb_average(n_simulations, n_arms, n_features, n_rounds, noise, lambda_param):
     total_regrets = np.zeros(n_rounds + 1)
     total_all_theta_hat = np.zeros((n_features, n_rounds + 1))
+    total_diff_per_round = np.zeros(n_rounds + 1)
 
     for i in range(n_simulations):
+        # Generating new values of true theta and item features
         item_features = np.random.uniform(low=-1, high=1, size=(n_features, n_arms))
         true_theta = np.random.uniform(low=-1, high=1, size=(n_features, 1))
 
         curr_regret_array, curr_all_theta_hat = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
         total_regrets += curr_regret_array
         total_all_theta_hat += curr_all_theta_hat
+        
+        total_diff_per_round += diff_theta_hat_true_theta(true_theta, curr_all_theta_hat)
 
     avg_regret = total_regrets / n_simulations
     avg_curr_all_theta_hat = total_all_theta_hat / n_simulations
+    avg_total_diff_per_round = total_diff_per_round / n_simulations
 
-    return avg_regret, avg_curr_all_theta_hat
+    return avg_regret, avg_curr_all_theta_hat, avg_total_diff_per_round
 
 
 def plot_regret(regrets):
@@ -161,26 +171,26 @@ def plot_cumulative_regrets(list_of_regrets, list_of_labels):
 def diff_theta_hat_true_theta(true_theta, theta_hat_array):
     n_features = theta_hat_array.shape[0]
     n_rounds = theta_hat_array.shape[1]
-    diff_per_rounds = np.zeros(n_rounds)
+    diff_per_round = np.zeros(n_rounds)
 
     for i in range(n_rounds):
         diff = np.abs(np.subtract(true_theta, theta_hat_array[:, i].reshape(n_features, 1)))
         total_diff = np.sum(diff)
-        diff_per_rounds[i] = total_diff
+        diff_per_round[i] = total_diff
 
-    return diff_per_rounds
+    return diff_per_round
 
-def plot_diff_theta_hat_true_theta(diff_per_rounds):
+def plot_diff_theta_hat_true_theta(diff_per_round):
     # Plot the results
-    plt.plot(diff_per_rounds)
+    plt.plot(diff_per_round)
     plt.xlabel('Round')
     plt.ylabel('Absolute difference between true theta and estimated theta')
     plt.show()
     
 
-def plot_multiple_diff_theta_hat_true_theta(list_of_diff_per_rounds, list_of_labels):
+def plot_multiple_diff_theta_hat_true_theta(list_of_diff_per_round, list_of_labels):
     fig, ax = plt.subplots()
-    for i, cumulative_regrets in enumerate(list_of_diff_per_rounds):
+    for i, cumulative_regrets in enumerate(list_of_diff_per_round):
         ax.plot(cumulative_regrets, label=list_of_labels[i])
 
     ax.set(xlabel='Time steps', ylabel='Absolute difference', title='Absolute difference between true theta and estimated theta')
