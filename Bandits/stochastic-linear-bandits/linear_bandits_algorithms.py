@@ -79,6 +79,7 @@ class EnvironmentLinUCB:
         self.item_features = item_features
         self.n_rounds = n_rounds
         self.true_theta = true_theta
+        self.noise = noise
 
         # Initializing variables
         self.optimal_reward = np.max(item_features.T @ true_theta)
@@ -128,7 +129,7 @@ def run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, 
     return regrets, all_theta_hat
 
 
-def run_lin_ucb_average(n_simulations, n_arms, n_features, n_rounds, noise, lambda_param):
+def run_lin_ucb_average(n_simulations, n_arms, n_features, n_rounds, noise, lambda_param, beta_fixed=True, beta_value=1.0):
     total_regrets = np.zeros(n_rounds + 1)
     total_all_theta_hat = np.zeros((n_features, n_rounds + 1))
     total_diff_per_round = np.zeros(n_rounds + 1)
@@ -138,7 +139,7 @@ def run_lin_ucb_average(n_simulations, n_arms, n_features, n_rounds, noise, lamb
         item_features = np.random.uniform(low=-1, high=1, size=(n_features, n_arms))
         true_theta = np.random.uniform(low=-1, high=1, size=(n_features, 1))
 
-        curr_regret_array, curr_all_theta_hat = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param)
+        curr_regret_array, curr_all_theta_hat = run_lin_ucb(n_arms, n_features, item_features, n_rounds, true_theta, noise, lambda_param, beta_fixed, beta_value)
         total_regrets += curr_regret_array
         total_all_theta_hat += curr_all_theta_hat
         
