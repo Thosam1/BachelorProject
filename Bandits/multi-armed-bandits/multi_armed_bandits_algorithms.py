@@ -339,3 +339,114 @@ def ucb_algorithm(n_arms, n_steps, c, p):
 
     # Return selected arms at each step
     return selected_arms, rewards, wins, losses
+
+
+class MultiArmedUCB:
+    def __init__(self, n_arms, n_steps, c):
+        # Initialize variables
+        self.n_arms = n_arms
+        self.n_steps = n_steps
+        self.c = c
+
+        self.total_rewards_by_arm = np.zeros(n_arms)
+        self.total_plays_by_arm = np.zeros(n_arms)
+
+        self.upper_bounds = np.ones(n_arms) * float('inf')
+        self.lower_bounds = np.ones(n_arms) * float('-inf')
+        self.selected_arms = np.zeros(n_steps)
+        self.rewards = np.zeros(n_steps)
+
+    # Choose the best action
+    def choose_action(self, curr_round):
+        # Calculate upper confidence bounds for each arm
+        for i in range(self.n_arms):
+            if self.total_plays_by_arm[i] > 0:
+                expected_reward_i = self.total_rewards_by_arm[i] / self.total_plays_by_arm[i]
+                
+                self.upper_bounds[i] = expected_reward_i + self.c / np.sqrt(self.total_plays_by_arm[i])
+                self.lower_bounds[i] = expected_reward_i - self.c / np.sqrt(self.total_plays_by_arm[i])
+
+        # Select arm with highest upper confidence bound and storing it
+        selected_arm = np.argmax(self.upper_bounds)
+        self.selected_arms[curr_round] = selected_arm
+        return selected_arm
+
+    def update(self, curr_round, action, reward):
+        self.rewards[curr_round] = reward
+        self.total_rewards_by_arm[action] += reward
+        self.total_plays_by_arm[action] += 1
+
+
+class EnvironmentMultiArmedUCB:
+    def __init__(self, n_arms, n_steps, p, rewards_associated):
+        self.n_arms = n_arms
+        self.n_steps = n_steps
+        self.p = p
+        self.rewards_associated = rewards_associated
+        self.rewards = np.zeros(n_steps)
+        self.regrets = np.zeros(n_steps)
+
+        self.optimal_expected_reward = 0
+        
+        for i in range(n_arms): 
+            expected_reward = p[i] * rewards_associated[i]
+            if(expected_reward > self.optimal_expected_reward):
+                self.optimal_expected_reward = expected_reward
+
+    # Observe the reward of the chosen action
+    def observe_reward(self, curr_round, action):
+        expected_reward = 0
+        if(np.random.rand() < self.p[action]):
+            expected_reward = self.rewards_associated[action]
+
+        # we could add noise to it
+        self.rewards[curr_round] = expected_reward
+        return expected_reward
+
+    def calculate_regret(self, curr_round, action):
+        regret = self.optimal_expected_reward - self.p[action] * self.rewards_associated[action] # loss that can incurred by not choosing the arm with the highest expected reward
+        self.regrets[curr_round] = self.regrets[curr_round - 1] + regret
+
+    def get_regrets(self):
+        return self.regrets
+
+
+def run_multi_armed_ucb(n_arms, n_steps, p, rewards_associated, c):
+    # Initializing the ucb class
+    multi_armed_ucb = MultiArmedUCB(n_arms, n_steps, c)
+
+    # Initializing the environment
+    environment = EnvironmentMultiArmedUCB(n_arms, n_steps, p, rewards_associated)
+
+    for t in range(n_steps):
+        # Picking up the best action
+        arm_chosen = multi_armed_ucb.choose_action(t)
+
+        # Reward received based on the action taken
+        expected_reward = environment.observe_reward(t, arm_chosen)
+
+        # Compute regret
+        environment.calculate_regret(t, arm_chosen)
+
+        # Update algorithm values after receiving reward
+        multi_armed_ucb.update(t, arm_chosen, expected_reward)
+
+    regrets = environment.get_regrets()
+
+    return regrets
+
+
+def run_multi_armed_ucb_average(n_simulations, n_arms, n_steps, rewards_associated, c):
+    total_regrets = np.zeros(n_steps)
+
+    for i in range(n_steps):
+        # Generating new values for probabilities and rewards associated
+        p = np.random.rand(n_arms)
+        rewards_associated = np.ones(n_arms)
+
+        curr_regrets = run_multi_armed_ucb(n_arms, n_steps, p, rewards_associated, c)
+        total_regrets += curr_regrets
+
+    avg_regret = total_regrets / n_simulations
+
+    return avg_regret
