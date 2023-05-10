@@ -1,0 +1,8 @@
+.DS_Store
+.idea/BachelorProject.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
+Bandits/multi-armed-bandits/__pycache__/helper_functions.cpython-310.pyc
