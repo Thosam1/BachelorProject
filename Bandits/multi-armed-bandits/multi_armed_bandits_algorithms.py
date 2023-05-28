@@ -340,6 +340,31 @@ def ucb_algorithm(n_arms, n_steps, c, p):
     # Return selected arms at each step
     return selected_arms, rewards, wins, losses
 
+class MultiArmedEpsilonGreedy:
+    def __init__(self, n_arms, n_steps, epsilon):
+        # Initialize variables
+        self.n_arms = n_arms
+        self.n_steps = n_steps
+        self.epsilon = epsilon
+
+        self.Q = np.zeros(n_arms)  # Action-value estimates
+        self.N = np.zeros(n_arms)  # Number of times each arm has been played
+
+        self.actions = np.zeros(self.n_steps)  # Arm picked
+
+    # Choose an action
+    def choose_action(self, curr_round):
+        if np.random.rand() < self.epsilon:
+            action = np.random.choice(self.n_arms)
+        else:
+            action = np.argmax(self.Q)
+        self.actions[curr_round] = action
+        return action
+
+    def update(self, action, reward):
+        self.N[action] += 1
+        self.Q[action] += (reward - self.Q[action]) * (1 / self.N[action])
+
 
 class MultiArmedUCB:
     def __init__(self, n_arms, n_steps, c):
@@ -377,7 +402,7 @@ class MultiArmedUCB:
         self.total_plays_by_arm[action] += 1
 
 
-class EnvironmentMultiArmedUCB:
+class Environment:
     def __init__(self, n_arms, n_steps, p, rewards_associated):
         self.n_arms = n_arms
         self.n_steps = n_steps
@@ -386,7 +411,7 @@ class EnvironmentMultiArmedUCB:
         self.rewards = np.zeros(n_steps)
         self.regrets = np.zeros(n_steps)
 
-        self.optimal_expected_reward = 0
+        self.optimal_expected_reward = -np.Inf
         
         for i in range(n_arms): 
             expected_reward = p[i] * rewards_associated[i]
@@ -410,13 +435,61 @@ class EnvironmentMultiArmedUCB:
     def get_regrets(self):
         return self.regrets
 
+def run_epsilon_greedy(n_arms, n_steps, p, rewards_associated, epsilon):
+    # Initializing the epsilon greedy class
+    multi_armed_epsilon_greedy = MultiArmedEpsilonGreedy(n_arms, n_steps, epsilon)
+
+    # Initializing the environment
+    environment = Environment(n_arms, n_steps, p, rewards_associated)
+
+    for t in range(n_steps):
+        # Picking an action
+        arm_chosen = multi_armed_epsilon_greedy.choose_action(t)
+
+        # Reward received based on the action taken
+        expected_reward = environment.observe_reward(t, arm_chosen)
+
+        # Compute regret
+        environment.calculate_regret(t, arm_chosen)
+
+        # Update algorithm values after receiving reward
+        multi_armed_epsilon_greedy.update(arm_chosen, expected_reward)
+
+    regrets = environment.get_regrets()
+
+    return regrets
+
+def run_epsilon_greedy_for_different_epsilons(n_simulations, n_arms, n_steps, p, rewards_associated, epsilons):
+    regrets = []
+    for epsilon in epsilons:
+        total_regret = 0
+        for simulation in range(n_simulations):
+            total_regret += run_epsilon_greedy(n_arms, n_steps, p, rewards_associated, epsilon)
+        avg_regret = total_regret / n_simulations
+        regrets.append(avg_regret)
+    return regrets
+
+def run_epsilon_greedy_average(n_simulations, n_arms, n_steps, rewards_associated, epsilon):
+    total_regrets = np.zeros(n_steps)
+
+    for i in range(n_steps):
+        # Generating new values for probabilities and rewards associated
+        p = np.random.rand(n_arms)
+        rewards_associated = np.ones(n_arms)
+
+        curr_regrets = run_epsilon_greedy(n_arms, n_steps, p, rewards_associated, epsilon)
+        total_regrets += curr_regrets
+
+    avg_regret = total_regrets / n_simulations
+
+    return avg_regret
 
 def run_multi_armed_ucb(n_arms, n_steps, p, rewards_associated, c):
     # Initializing the ucb class
     multi_armed_ucb = MultiArmedUCB(n_arms, n_steps, c)
 
     # Initializing the environment
-    environment = EnvironmentMultiArmedUCB(n_arms, n_steps, p, rewards_associated)
+    environment = Environment(n_arms, n_steps, p, rewards_associated)
 
     for t in range(n_steps):
         # Picking up the best action
@@ -433,6 +506,16 @@ def run_multi_armed_ucb(n_arms, n_steps, p, rewards_associated, c):
 
     regrets = environment.get_regrets()
 
+    return regrets
+
+def run_ucb_for_different_epsilons(n_simulations, n_arms, n_steps, p, rewards_associated, c_list):
+    regrets = []
+    for c in c_list:
+        total_regret = 0
+        for simulation in range(n_simulations):
+            total_regret += run_multi_armed_ucb(n_arms, n_steps, p, rewards_associated, c)
+        avg_regret = total_regret / n_simulations
+        regrets.append(avg_regret)
     return regrets
 
 

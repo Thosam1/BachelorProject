@@ -345,3 +345,12 @@ def empirical_probabilities_with_eliminations(results_all_arms_end_of_explore, e
         empirical_probabilities[arm_step[0]] = end_of_explore_total[arm_step[0]] / arm_step[2]
     return empirical_probabilities
 
+def plot_cumulative_regrets(list_of_regrets, list_of_labels):
+    fig, ax = plt.subplots()
+    for i, cumulative_regrets in enumerate(list_of_regrets):
+        ax.plot(cumulative_regrets, label=list_of_labels[i])
+
+    ax.set(xlabel='Time steps', ylabel='Cumulative regret', title='Cumulative regret over time')
+    ax.grid()
+    ax.legend()
+    plt.show()
