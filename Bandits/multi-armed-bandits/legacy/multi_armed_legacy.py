@@ -1,9 +1,15 @@
 import numpy as np
 
-# Older code ---
-def explore_then_exploit_naive(n_steps, n_arms, explore_fraction, p):
+"""
+    This python file contains all the initial code written over the first week, it is what it is, not the best and the algorithms 
+    are not very separated from the environment and modularized.
+    However, I think it is quiet interesting to still keep this code along with the legacy notebook, because there are useful 
+    visualization for comprehension to do.
+"""
+
+def explore_then_commit_naive(n_steps, n_arms, explore_fraction, p):
     """
-    Implements a naive explore-then-exploit strategy for multi-armed bandits.
+    Implements a naive explore-then-commit strategy for multi-armed bandits.
 
     Args:
         n_steps (int): Total number of steps in the experiment.
@@ -76,9 +82,9 @@ def total_explore_arm_pulls_for_elimination_algo(n_arms: int, n_rounds: int, rou
     return total * round_steps_per_arm
 
 
-def explore_then_exploit_elimination(n_steps, n_arms, n_rounds, round_steps_per_arm, p):
+def explore_then_commit_elimination(n_steps, n_arms, n_rounds, round_steps_per_arm, p):
     """
-    Implements an explore-then-exploit elimination algorithm for multi-armed bandits.
+    Implements an explore-then-commit elimination algorithm for multi-armed bandits.
 
     Args:
         n_steps (int): The total number of steps.
