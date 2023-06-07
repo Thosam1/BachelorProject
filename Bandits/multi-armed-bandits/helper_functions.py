@@ -346,6 +346,16 @@ def empirical_probabilities_with_eliminations(results_all_arms_end_of_explore, e
     return empirical_probabilities
 
 def plot_cumulative_regrets(list_of_regrets, list_of_labels):
+    """
+    Plots the multiple lines of cumulative regrets over time.
+
+    Args:
+        list_of_regrets (list): A list of numpy arrays, each containing cumulative regrets over time.
+        list_of_labels (list): A list of labels corresponding to each set of cumulative regrets.
+
+    Returns:
+        None
+    """
     fig, ax = plt.subplots()
     for i, cumulative_regrets in enumerate(list_of_regrets):
         ax.plot(cumulative_regrets, label=list_of_labels[i])
