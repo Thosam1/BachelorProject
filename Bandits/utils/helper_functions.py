@@ -1,6 +1,7 @@
 """
-    This document contains useful helper functions that are used and required for multiple notebooks to work.
+    This file contains useful helper functions that are used and required for multiple notebooks to work.
 """
+
 import numpy as np
 
 def probability_distribution_by_gaps(n_arms, gaps):

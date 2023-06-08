@@ -1,3 +1,9 @@
+"""
+    This file contains the implementation of the Environment class, which represents the environment for a linear
+    bandit algorithm. It provides methods for initializing the environment, observing rewards, calculating regrets,
+    and accessing cumulative regrets.
+"""
+
 import numpy as np
 
 class Environment:

@@ -1,7 +1,7 @@
 """
-    This document contains useful helper functions that are related to plotting results.
+    This file contains useful helper functions that are related to plotting results.
 """
-import numpy as np
+
 import matplotlib.pyplot as plt
 
 def plot_multiple_lines(list_of_lines, list_of_labels, title, xlabel, ylabel):
