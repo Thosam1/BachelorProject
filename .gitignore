@@ -6,3 +6,6 @@
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
 Bandits/multi-armed-bandits/__pycache__/helper_functions.cpython-310.pyc
+Bandits/multi-armed-bandits/legacy/__pycache__/multi_armed_legacy.cpython-310.pyc
+.gitignore
+Bandits/multi-armed-bandits/legacy/__pycache__/helper_functions_legacy.cpython-310.pyc

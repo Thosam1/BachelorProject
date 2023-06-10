@@ -301,25 +301,23 @@ def plot_estimate_interval(n_arms, wins, losses, c):
     """
     # Calculate upper and lower confidence bounds for each arm
     p = np.zeros(n_arms)
-    lower_bounds = np.zeros(n_arms)
-    upper_bounds = np.zeros(n_arms)
+    errors = np.zeros(n_arms)
     for i in range(n_arms):
         if wins[i] + losses[i] > 0:
             p[i] = wins[i] / (wins[i] + losses[i])
-            lower_bounds[i] = p[i] - c / np.sqrt(wins[i] + losses[i])
-            upper_bounds[i] = p[i] + c / np.sqrt(wins[i] + losses[i])
+            errors[i] = c / np.sqrt(wins[i] + losses[i])
         else:
             p[i] = 0
-            lower_bounds[i] = 0
-            upper_bounds[i] = 0
+            errors[i] = 0
+
 
     # Plot bar plot with an estimate interval
     x = np.arange(n_arms)
     fig, ax = plt.subplots()
     ax.bar(x, p, align='center', alpha=0.5)
-    ax.vlines(x, lower_bounds, upper_bounds, colors='r', linewidth=2)
+    ax.errorbar(x, p, yerr=errors, fmt='o', ecolor='r', capsize=5, markeredgecolor='r', markerfacecolor='r')
     ax.set_xlabel('Arm')
-    ax.set_ylabel('Probability Estimate')
+    ax.set_ylabel('Average Reward')
     ax.set_title('Estimate Interval')
     plt.show()
 
