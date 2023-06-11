@@ -97,7 +97,6 @@ class LinUCB:
         # This estimate represents the center of the ellipsoid in the feature space.
         self.theta_hat[:, curr_round] = V_t_inv @ self.sum_A_s_X_s
 
-    # Returns the matrix of each estimated theta at every round
     def get_all_theta_hat(self):
         """
         Returns the matrix of each estimated theta at every round.
@@ -107,7 +106,6 @@ class LinUCB:
         """
         return self.theta_hat
 
-    # Returns the last estimated theta
     def get_last_theta_hat(self):
         """
         Returns the last estimated theta.
@@ -116,4 +114,22 @@ class LinUCB:
             numpy.ndarray: The last estimated theta with shape (n_features,).
         """
         return self.theta_hat[:, self.n_rounds + 1]
+    
+    def get_last_theta_hat(self):
+        """
+        Returns the last estimated theta.
+
+        Returns:
+            numpy.ndarray: The last estimated theta with shape (n_features,).
+        """
+        return self.theta_hat[:, self.n_rounds]
+    
+    def get_last_v_t(self):
+        """
+        Returns the V_t matrix.
+
+        Returns:
+            numpy.ndarray: The V_t matrix with shape (n_features, n_features).
+        """
+        return self.V_t
     
