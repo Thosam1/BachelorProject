@@ -1,9 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import csv
+"""
+    This file contains functions thats read and manipulate CSV files.
+"""
 
-# Read the given csv as a dict of dict
+import csv
+import numpy as np
+
 def read_csv_as_dict_of_dict(filename):
+    """
+    Reads a CSV file and returns its content as a dictionary of dictionaries.
+
+    Args:
+        filename (str): The path to the CSV file.
+
+    Returns:
+        dict: A dictionary of dictionaries representing the CSV content. The first column is assumed to be the primary key.
+    """
     result = {}
     with open(filename, 'r') as file:
         reader = csv.DictReader(file)
@@ -15,9 +26,16 @@ def read_csv_as_dict_of_dict(filename):
                 result[key] = filtered_row
     return result
 
-
-# Read the given csv as a dict of np arrays
 def read_csv_as_dict_of_arrays(filename):
+    """
+    Reads a CSV file and returns its content as a dictionary of NumPy arrays.
+
+    Args:
+        filename (str): The path to the CSV file.
+
+    Returns:
+        dict: A dictionary of NumPy arrays representing the CSV content. The first column is used as the dictionary key.
+    """
     result = {}
     with open(filename, 'r') as file:
         reader = csv.DictReader(file)
@@ -27,8 +45,18 @@ def read_csv_as_dict_of_arrays(filename):
             result[key] = values
     return result
 
-# Removes a column in a csv file by the given column index
 def remove_csv_column_by_index(input_file_path, output_file_path, column_to_remove):
+    """
+    Removes a column from a CSV file based on the given column index.
+
+    Args:
+        input_file_path (str): The path to the input CSV file.
+        output_file_path (str): The path to the output CSV file.
+        column_to_remove (int): The index of the column to be removed.
+
+    Returns:
+        None
+    """
     input_file_path = '../dimension_reduction/reduced_data_PCA_10D.csv'
     output_file_path = '../dimension_reduction/reduced_data_PCA_10D_.csv'
     column_to_remove = column_to_remove
@@ -44,9 +72,18 @@ def remove_csv_column_by_index(input_file_path, output_file_path, column_to_remo
 
     print("Modified CSV file exported successfully.")
 
-# Appends a column filled with 'value'
 def append_column_in_csv(input_file_path, output_file_path, value):
+    """
+    Appends a column filled with the specified value to a CSV file.
 
+    Args:
+        input_file_path (str): The path to the input CSV file.
+        output_file_path (str): The path to the output CSV file.
+        value: The value to be filled in the appended column.
+
+    Returns:
+        None
+    """
     # Read the input CSV file and modify the rows
     with open(input_file_path, 'r') as file:
         reader = csv.reader(file)
@@ -58,44 +95,3 @@ def append_column_in_csv(input_file_path, output_file_path, value):
         writer.writerows(rows)
 
     print("Modified CSV file exported successfully.")
-
-
-def plot_ratings_for_user(user_id, dictionary):
-    ratings_count = {
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-        5: 0
-    }
-    ratings_list = dictionary[user_id].values()
-    for rating in ratings_list:
-        if len(rating) != 0:
-            ratings_count[int(float(rating))] += 1
-
-    ratings = sorted(ratings_count.items())
-
-    x = [rating[0] for rating in ratings]
-    y = [rating[1] for rating in ratings]
-
-    plt.bar(x, y)
-    plt.xlabel('Rating')
-    plt.ylabel('Count')
-    plt.title('Count of Ratings for user ' + user_id)
-    plt.show()
-
-def plot_dict_list(list_of_dict, x_label, y_label, title, legends):
-    x_values = list(list_of_dict[0].keys())  
-    
-    fig, ax = plt.subplots()
-    
-    for i, dictionary in enumerate(list_of_dict):
-        y_values = [dictionary[key] for key in x_values]
-        ax.plot(x_values, y_values, marker='o', label=legends[i])
-    
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_title(title)
-    ax.legend()
-    ax.grid(True)
-    plt.show()

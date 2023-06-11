@@ -9,3 +9,10 @@ Bandits/multi-armed-bandits/__pycache__/helper_functions.cpython-310.pyc
 Bandits/multi-armed-bandits/legacy/__pycache__/multi_armed_legacy.cpython-310.pyc
 .gitignore
 Bandits/multi-armed-bandits/legacy/__pycache__/helper_functions_legacy.cpython-310.pyc
+Bandits/linear-bandits/__pycache__/linucb_algorithm.cpython-310.pyc
+Bandits/linear-bandits/real-data/__pycache__/environment.cpython-310.pyc
+Bandits/linear-bandits/real-data/linucb_simulation/__pycache__/linucb_training.cpython-310.pyc
+Bandits/linear-bandits/real-data/utils/__pycache__/csv_operations.cpython-310.pyc
+Bandits/linear-bandits/real-data/utils/__pycache__/data_processing.cpython-310.pyc
+Bandits/linear-bandits/real-data/utils/__pycache__/plot_preprocessed_stats.cpython-310.pyc
+Bandits/utils/__pycache__/helper_plots.cpython-310.pyc
