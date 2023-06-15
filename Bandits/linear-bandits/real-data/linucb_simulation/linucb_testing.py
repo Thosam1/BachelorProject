@@ -36,7 +36,7 @@ def lin_ucb_choose_action_test(curr_round, theta_hat, V_t, n_arms, item_features
         estimated_value = theta_hat.T @ item_features[:, i]
         penalty_value = np.sqrt(beta_param_t) * np.sqrt(
             item_features[:, i].T @ (np.linalg.inv(V_t) @ item_features[:, i]))
-        value = estimated_value + penalty_value
+        value = estimated_value # + penalty_value
         indices_values.append((i, value))
         if value >= max_value:
             max_value = value
