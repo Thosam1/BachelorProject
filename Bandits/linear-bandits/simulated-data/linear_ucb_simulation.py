@@ -2,7 +2,8 @@
     This file contains the related functions for running simulations with the Linear UCB algorithm and
     calculating distances between true theta and estimated theta (evaluating the performance).
 """
-
+import sys
+sys.path.append('../')
 import numpy as np
 from environment import *
 from linucb_algorithm import *

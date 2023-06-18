@@ -72,7 +72,7 @@ def simulation_on_all_users(features_by_music_id_dict, ratings_by_reviewer_train
     # Getting the regret averages (to analyse training)
     avg_regrets = total_regrets / len(list(ratings_by_reviewer_training.keys())) # todo weighted
 
-    # Getting the average diff per dimensions (to analyse testing)
+    # Getting the average diff (to analyse testing)
     avg_diff = total_diff / total_nb_ratings
 
     return (avg_regrets, avg_diff)
