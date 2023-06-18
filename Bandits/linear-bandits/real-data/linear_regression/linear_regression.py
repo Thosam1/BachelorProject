@@ -26,7 +26,7 @@ def linear_regression_on_one_user(features_by_music_id_dict, ratings_by_reviewer
 
     # Training phase
     item_features, item_rewards, _ = get_item_features_and_rewards_for_user(n_features, ratings_by_reviewer_training[selected_reviewer_id], features_by_music_id_dict)
-    X = item_features.reshape((item_features.shape[0], n_features))
+    X = np.transpose(item_features)
     y = item_rewards.reshape((item_rewards.shape[0], 1))
 
     # Create an instance of the Linear Regression model
@@ -37,7 +37,7 @@ def linear_regression_on_one_user(features_by_music_id_dict, ratings_by_reviewer
 
     # Testing phase
     item_features, item_rewards, _ = get_item_features_and_rewards_for_user(n_features, ratings_by_reviewer_test[selected_reviewer_id], features_by_music_id_dict)
-    X_test = item_features.reshape((item_features.shape[0], n_features))
+    X_test = np.transpose(item_features)
     y_test = item_rewards.reshape((item_rewards.shape[0], 1))
 
     # Predict the ratings for the test data
@@ -93,6 +93,8 @@ def linear_regression_on_all_users_all_dimensions(features_dict_by_dim, ratings_
         list: A list of dictionaries containing the average absolute difference by dimension.
     """
     avg_diff_by_dim_list = []
+    # Store the average absolute difference by dimension
+    avg_diff_by_dim = {}
 
     for key in features_dict_by_dim:
         # Get features for the specific dimension
@@ -100,9 +102,8 @@ def linear_regression_on_all_users_all_dimensions(features_dict_by_dim, ratings_
         
         # Perform linear regression for all users in the specific dimension
         avg_diff = linear_regression_on_all_users(features_by_music_id_dict, ratings_by_reviewer_training, ratings_by_reviewer_test)
-
-        # Store the average absolute difference by dimension
-        avg_diff_by_dim = {key: avg_diff}
-        avg_diff_by_dim_list.append(avg_diff_by_dim)
+        avg_diff_by_dim[key] = avg_diff
+        
+    avg_diff_by_dim_list.append(avg_diff_by_dim)
 
     return avg_diff_by_dim_list
