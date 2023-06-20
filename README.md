@@ -35,8 +35,6 @@ To run the code and reproduce the experiments conducted in this project, you nee
 
 To use the code in this repository, follow the steps below:
 
-0. There are mainly 4 folders: multi-armed bandits, linear bandits in a simulated environment, data-preprocessing, linear bandits on real data.
-
 1. Open any Jupyter Notebook to access the main codebase and experiments.
 
 2. Execute the code cells sequentially to replicate the experiments and observe the results.
